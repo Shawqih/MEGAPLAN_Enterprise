@@ -1,15 +1,33 @@
-
 name: Build AutoCAD Plugin
-on: [push]
+
+on:
+  push:
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: windows-latest
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 6.0.x
-      - name: Build
-        run: dotnet build
+
+      - name: Restore Dependencies
+        run: dotnet restore
+
+      - name: Build Plugin
+        run: dotnet build ./AutoCADPlugin/AutoCADPlugin.csproj --configuration Release
+
+      - name: Publish Plugin
+        run: dotnet publish ./AutoCADPlugin/AutoCADPlugin.csproj -c Release -o ./publish
+
+      - name: Upload Plugin Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: AutoCADPlugin
+          path: ./publish
